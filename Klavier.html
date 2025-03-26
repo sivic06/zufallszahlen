@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zufallszahlen</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Zufallszahlen">
+    <link rel="apple-touch-icon" href="icon.png"> <!-- Optional, falls du ein Icon hast -->
+
+    <style>
+        /* Dein gesamtes CSS bleibt gleich */
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-size: 48px;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+        }
+        .container {
+            display: flex;
+            gap: 50px;
+        }
+        .box {
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            min-width: 80px;
+            text-align: center;
+        }
+        #next {
+            color: #888;
+        }
+        .progress-bar {
+            width: 40%;
+            height: 10px;
+            background-color: lightgray;
+            margin-top: 20px;
+            border-radius: 1em;
+            overflow: hidden;
+        }
+        .progress {
+            height: 100%;
+            background: rgb(212, 113, 255);
+            width: 0%;
+            transition: none;
+        }
+        .metronome {
+            width: 20px;
+            height: 20px;
+            background-color: rgb(0, 0, 0);
+            border-radius: 50%;
+            margin-top: 20px;
+            transition: background-color 0.1s;
+        }
+        .metronome.active {
+            background-color: rgb(231, 175, 255);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div id="current" class="box">1</div>
+        <div id="next" class="box">?</div>
+    </div>
+    <div class="progress-bar">
+        <div id="progress" class="progress"></div>
+    </div>
+    <div id="metronome" class="metronome"></div>
+
+    <script>
+        const metronomeElement = document.getElementById("metronome");
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playClick() {
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            oscillator.type = "square";
+            oscillator.frequency.setValueAtTime(500, audioContext.currentTime);
+            gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + 0.075);
+        }
+
+        function metronomeTick() {
+            metronomeElement.classList.add("active");
+            playClick();
+            setTimeout(() => {
+                metronomeElement.classList.remove("active");
+            }, 100);
+        }
+
+        function startMetronome() {
+            setInterval(metronomeTick, 6000/4);
+        }
+
+        function updateNumber() {
+            const nextNum = Math.floor(Math.random() * 7) + 1;
+            document.getElementById("next").textContent = nextNum;
+
+            const randomInterval = 6000;
+
+            animateProgress(randomInterval);
+
+            setTimeout(() => {
+                document.getElementById("current").textContent = nextNum;
+                document.getElementById("next").textContent = "?";
+                updateNumber();
+            }, randomInterval);
+        }
+
+        function animateProgress(duration) {
+            const progressBar = document.getElementById("progress");
+            progressBar.style.transition = "none";
+            progressBar.style.width = "0%";
+
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    progressBar.style.transition = `width ${duration}ms linear`;
+                    progressBar.style.width = "100%";
+                });
+            });
+        }
+
+        document.body.addEventListener('click', () => {
+            audioContext.resume().then(() => {
+                startMetronome();
+                updateNumber();
+            });
+        }, { once: true });
+    </script>
+</body>
+</html>
