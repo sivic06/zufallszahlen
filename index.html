@@ -100,14 +100,14 @@
         }
 
         function startMetronome() {
-            setInterval(metronomeTick, 6000/4);
+            setInterval(metronomeTick, 4000/4);
         }
 
         function updateNumber() {
             const nextNum = Math.floor(Math.random() * 7) + 1;
             document.getElementById("next").textContent = nextNum;
 
-            const randomInterval = 6000;
+            const randomInterval = 4000;
 
             animateProgress(randomInterval);
 
